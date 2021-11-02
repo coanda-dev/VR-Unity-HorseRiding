@@ -12,6 +12,8 @@ namespace HorseRiding.Scripts
     [AddComponentMenu("XR/Locomotion/Riding Provider (Action-based)")]
     public class ActionBasedRidingProvider : LocomotionProvider
     {
+        private CSV_Logger _logger;
+        
         #region Inputs
 
         [SerializeField] private InputActionProperty _hmdPos;
@@ -42,6 +44,9 @@ namespace HorseRiding.Scripts
             base.Awake();
 
             _measurementsRingBuffer = new float[_measurementsCount];
+            string path = $"C:\\dev\\VR-Unity-HorseRiding\\.analysis\\data\\log_{DateTime.Now.ToFileTimeUtc().ToString()}.csv";
+            _logger = new CSV_Logger(path);
+            _logger.file.WriteLine("PosX;PosY;PosZ");
         }
 
         private void FixedUpdate()
@@ -74,6 +79,7 @@ namespace HorseRiding.Scripts
             Vector3 headPos = _hmdPos.action?.ReadValue<Vector3>() ?? Vector3.zero;
             _measurementsRingBuffer[_insertPtr % _measurementsCount] = headPos.y;
             _insertPtr++;
+            _logger.file.WriteLine($"{headPos.x.ToString()};{headPos.y.ToString()};{headPos.z.ToString()}");
         }
 
         private float ComputeVelocityMagnitude()
